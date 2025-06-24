@@ -1,0 +1,6 @@
+torch>=1.10.0
+torchvision
+numpy
+scikit-learn
+trimesh
+wandb #Optional for logging
