@@ -2,5 +2,7 @@ torch>=1.10.0
 torchvision
 numpy
 scikit-learn
-trimesh
+trimesh>=3.9.0
+Pillow
+tqdm
 wandb #Optional for logging
