@@ -58,4 +58,76 @@ def evaluate(args):
     plt.close()
 
     #6. Cross-modal Retrieval (if we have paired data)
-    if hasa
+    if hasattr(args, 'cross_modal'):
+		evaluate_cross_modal(model, val_loader, device)
+
+def evaluate_cross_modal(model, dataloader, device):
+	"""Evaluate point cloud -> image retrieval"""
+	pc_features, img_features = [], []
+
+    #Load the image model (ResNet)
+    img_model = ResNet(resnet50(), feat_dim=2048).to(device)
+    img_model.load_state_dict(torch.load(f"checkpoints/{args.exp_name}/models/img_model_best.pth"))
+    img_model.eval()
+    
+    with torch.no_grad():
+		for point_cloud, img, _ in dataloader:
+            #
+			point_cloud = point_cloud.to(device).transpose(2, 1)
+			_, _, pc_feat = model(point_cloud)
+			pc_features.append(pc_feat.cpu())
+
+			#
+            img_feat = img_model(img.to(device))
+    		img_features.append(img_feat.cpu())
+
+    #Convert to tensors
+    pc_features = torch.cat(pc_features)
+    img_features = torch.cat(img_features)
+
+    #Calculate recovery metrics
+    def calculate_metrics(query_feats, target_feats, top_k=(1, 5, 10)):
+        """Calculate Recall@k y Median Rank"""
+        sim_matrix = torch.mm(query_feats, target_feats.t()) #Similarity matrix
+
+        results = {}
+        for k in top_k:
+            -, indices = sim_matrix.topk(k, dim=1)
+            correct = torch.zeros(len(query_feats))
+            for i in range(len(query_feats)):
+                correct[i] = i in indices[i]
+            results[f"Recall@{k}"] = correct.mean().item()
+
+        #Calculate Median Rank
+        -, indices = sim_matrix.sort(descending=True)
+        ranks = torch.where(indices == torch.arange(len(query_feats)).unsqueeze(1))[1]
+        results["MedianRank"] = torch.median(ranks.float()).item()
+
+        return results
+
+    #Evaluate both directions (PC→Img and Img→PC)
+    print("\nCross Recovery Metrics:")
+
+    #PC → Image
+    metrics = calculate_metrics(pc_features, img_features)
+    print("Point Cloud → Image:")
+    for k, v in metrics.item():
+        print(f"{k}: {v:.4f}")
+
+    #Image → PC
+    metrics = calculate_metrics(img_features, pc_features)
+    print("\nImage → Point Cloud:")
+    for k, v in metrics.items():
+        print(f"{k}: {v:.4f}")
+
+if __name__ == "__main__":
+	import argparse
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--exp_name', type=str, required=True)
+	parser.add_argument('--data_path', type=str, required=True)
+	parser.add_argument('--batch_size', type=int, default=32)
+	parser.add_argument('--k', type=int, default=20)
+	parser.add_argument('--emb_dims', type=int, default=1024)
+	args = parser.parse_args()
+
+	evaluate(args)
