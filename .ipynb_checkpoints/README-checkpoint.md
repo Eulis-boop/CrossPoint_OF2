@@ -10,19 +10,19 @@ Adapt the **CrossPoint** self-supervised learning framework to train on the **Ob
 
 ## Repository Structure
 CrossPoint_OF2/
-├── datasets/
-│ └── ObjectFolder2.py # Custom dataset loader for ObjectFolder2
-├── models/
-│ └── dgcnn.py # DGCNN and ResNet architectures
-├── scripts/
-│ ├── train_trial.slurm # SLURM job script for training
-│ └── evaluate_trial.slurm # SLURM job script for evaluation
-├── train.py # Self-supervised training script
-├── evaluate.py # Linear classifier training + t-SNE visualization
-├── util.py # Utility functions (logging, metrics)
-├── requirements.txt # Required packages
-├── README.md # Project documentation
-└── checkpoints/ # Saved models and logs
+- datasets/
+  └── ObjectFolder2.py # Custom dataset loader for ObjectFolder2
+- models/
+  └── dgcnn.py # DGCNN and ResNet architectures
+- scripts/
+  ├── train_trial.slurm # SLURM job script for training
+  └── evaluate_trial.slurm # SLURM job script for evaluation
+- train.py # Self-supervised training script
+- evaluate.py # Linear classifier training + t-SNE visualization
+- util.py # Utility functions (logging, metrics)
+- requirements.txt # Required packages
+- README.md # Project documentation
+- checkpoints/ # Saved models and logs
 
 ---
 
@@ -74,8 +74,11 @@ python evaluate.py \
 - Linear classifier accuracy (on ObjectFolder2)
 - t-SNE visualizations (colored by object class)
 
+```Linear classifier accuracy (SVM): %```
+
 <p align="center">
     <em>(Pending...)</em>
+    <img src="docs/tsne_example.png" alt="t-SNE visualization of embeddings" width="500"/>
 </p>
 
 ---
