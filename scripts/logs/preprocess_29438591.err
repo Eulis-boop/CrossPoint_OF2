@@ -1,0 +1,2 @@
+/home/sarai/jupyter1/lib/python3.10/site-packages/trimesh/grouping.py:99: RuntimeWarning: invalid value encountered in cast
+  stacked = np.column_stack(stacked).round().astype(np.int64)

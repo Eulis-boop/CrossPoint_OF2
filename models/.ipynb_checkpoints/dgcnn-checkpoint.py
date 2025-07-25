@@ -1,8 +1,3 @@
-# Adapted from the official CrossPoint repository:
-# https://github.com/yongqinwang/CrossPoint
-# Original DGCNN implementation: Wang et al., "Dynamic Graph CNN for Learning on Point Clouds" (2019)
-# Paper: https://arxiv.org/abs/1801.07829
-
 import os
 import sys
 import copy
