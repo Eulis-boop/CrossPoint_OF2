@@ -5,10 +5,8 @@ import torch
 import numpy as np
 import wandb
 import time
-from lightly.loss.ntx_ent_loss import NTXentLoss
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
 
+from lightly.loss.ntx_ent_loss import NTXentLoss
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -18,33 +16,9 @@ from datasets.ObjectFolder2 import ObjectFolder2Dataset, get_default_transform
 from models.dgcnn import DGCNN, ResNet
 from util import IOStream, AverageMeter
 
-from modelnet40_svm import ModelNet40SVM  # Assuming you have this file for downstream evaluation
-
 def setup_directories(exp_name):
     os.makedirs(f'checkpoints/{exp_name}/models', exist_ok=True)
-
-def evaluate_linear_svm(model, device):
-    model.eval()
-    train_loader = DataLoader(ModelNet40SVM(partition='train', num_points=1024), batch_size=128, shuffle=True)
-    test_loader = DataLoader(ModelNet40SVM(partition='test', num_points=1024), batch_size=128, shuffle=False)
-
-    def extract_features(loader):
-        features, labels = [], []
-        with torch.no_grad():
-            for data, label in loader:
-                data = data.permute(0, 2, 1).to(device)
-                feat = model(data)[2].detach().cpu().numpy()
-                features.extend(feat)
-                labels.extend(label.numpy())
-        return np.array(features), np.array(labels)
-
-    X_train, y_train = extract_features(train_loader)
-    X_test, y_test = extract_features(test_loader)
-
-    clf = SVC(C=0.1, kernel='linear')
-    clf.fit(X_train, y_train)
-    acc = clf.score(X_test, y_test)
-    return acc
+    os.makedirs(f'checkpoints/{exp_name}/features', exist_ok=True)
 
 def train(args, io):
     wandb.init(project="CrossPoint-OF2", name=args.exp_name)
@@ -58,7 +32,7 @@ def train(args, io):
 
     # Model setup
     point_model = DGCNN(args).to(device)
-    img_model = ResNet(torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True), feat_dim=2048).to(device)
+    img_model = ResNet(torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True), feat_dim=256).to(device)
 
     if args.resume:
         point_model.load_state_dict(torch.load(args.model_path))
@@ -70,7 +44,6 @@ def train(args, io):
     scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-5)
     criterion = NTXentLoss(temperature=0.1).to(device)
 
-    best_acc = 0
     for epoch in range(args.start_epoch, args.epochs):
         scheduler.step()
         point_model.train()
@@ -97,20 +70,25 @@ def train(args, io):
 
         wandb.log({"Train Loss": loss_meter.avg, "Epoch": epoch})
 
-        acc = evaluate_linear_svm(point_model, device)
-        wandb.log({"Linear SVM Accuracy": acc})
-        io.cprint(f"Linear Evaluation Accuracy: {acc:.4f}")
+        # Save model checkpoints
+        torch.save(point_model.state_dict(), f"checkpoints/{args.exp_name}/models/point_model_epoch{epoch}.pth")
+        torch.save(img_model.state_dict(), f"checkpoints/{args.exp_name}/models/img_model_epoch{epoch}.pth")
 
-        # Save best model
-        if acc > best_acc:
-            best_acc = acc
-            io.cprint("Saving best model.")
-            torch.save(point_model.state_dict(), f"checkpoints/{args.exp_name}/models/best_point_model.pth")
-            torch.save(img_model.state_dict(), f"checkpoints/{args.exp_name}/models/best_img_model.pth")
-
-        # Save last model every epoch
-        torch.save(point_model.state_dict(), f"checkpoints/{args.exp_name}/models/last_point_model.pth")
-        torch.save(img_model.state_dict(), f"checkpoints/{args.exp_name}/models/last_img_model.pth")
+        point_model.eval()
+        img_model.eval()
+        all_pc_features, all_img_features = [], []
+        with torch.no_grad():
+            for pc, img in train_loader:
+                pc, img = pc.to(device), img.to(device)
+                pc = pc.transpose(2, 1)
+                _, pc_feat, _ = point_model(pc)
+                img_feat = img_model(img)
+                all_pc_features.append(pc_feat.cpu())
+                all_img_features.append(img_feat.cpu())
+        all_pc_features = torch.cat(all_pc_features)
+        all_img_features = torch.cat(all_img_features)
+        torch.save(all_pc_features, f'checkpoints/{args.exp_name}/features/pc_features_epoch{epoch}.pt')
+        torch.save(all_img_features, f'checkpoints/{args.exp_name}/features/img_features_epoch{epoch}.pt')
 
 def main():
     parser = argparse.ArgumentParser()
