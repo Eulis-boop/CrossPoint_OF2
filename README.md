@@ -11,12 +11,12 @@ Adapt the **CrossPoint** self-supervised learning framework to train on the **Ob
 ## Repository Structure
 CrossPoint_OF2/
 - datasets/
-  └── ObjectFolder2.py # Custom dataset loader for ObjectFolder2
+-- ObjectFolder2.py # Custom dataset loader for ObjectFolder2
 - models/
-  └── dgcnn.py # DGCNN and ResNet architectures
+-- dgcnn.py # DGCNN and ResNet architectures
 - scripts/
-  ├── train_trial.slurm # SLURM job script for training
-  └── evaluate_trial.slurm # SLURM job script for evaluation
+-- train_trial.slurm # SLURM job script for training
+-- evaluate_trial.slurm # SLURM job script for evaluation
 - train.py # Self-supervised training script
 - evaluate.py # Linear classifier training + t-SNE visualization
 - util.py # Utility functions (logging, metrics)
