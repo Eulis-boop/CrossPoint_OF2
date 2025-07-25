@@ -1,133 +1,103 @@
 import os
-import numpy as np
+import argparse
 import torch
-import matplotlib.pyplot as plt
-from sklearn.manifold import TSNE
-from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
-from datasets.ObjectFolder2 import ObjectFolder2, get_default_transform
-from models.dgcnn import DGCNN
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+
 from torch.utils.data import DataLoader
+from datasets.ObjectFolder2 import ObjectFolder2Dataset, get_default_transform
+from models.dgcnn import DGCNN, ResNet
 
-def evaluate(args):
-    #1. Load trained model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = DGCNN(args).to(device)
-    model.load_state_dict(torch.load(f"checkpoints/{args.exp_name}/models/best_model.pth"))
-    model.eval()
+@torch.no_grad()
+def extract_features(dataloader, point_model, image_model, device):
+    point_model.eval()
+    image_model.eval()
 
-    #2. Load data
-    transform = get_default_transform()
-    val_dataset = ObjectFolder2(
-        root_dir = args.data_path,
-        transform = transform,
-        split = 'val' #!
+    point_feats, img_feats, labels = [], [], []
+
+    for pc, img, label in dataloader:
+        pc = pc.to(device).transpose(2, 1)
+        img = img.to(device)
+
+        _, pc_emb, _ = point_model(pc)
+        img_emb = image_model(img)
+
+        point_feats.append(pc_emb.cpu().numpy())
+        img_feats.append(img_emb.cpu().numpy())
+        labels.extend(label)
+
+    return (
+        np.vstack(point_feats),
+        np.vstack(img_feats),
+        np.array(labels)
     )
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
 
-    #3. Extract features
-    features, labels = [], []
-    with torch.no_grad():
-        for point_cloud, img, label in val_loader:
-            point_cloud = point_cloud.to(device).transpose(2, 1)
-            _, _, feat = model(point_cloud)
-            features.append(feat.cpu().numpy())
-            labels.append(label.numpy())
+def main(args):
+    device = torch.device("cuda" if args.cuda and torch.cuda.is_available() else "cpu")
 
-    features = np.concatenate(features)
-    labels = np.concatenate(labels)
+    # Dataset
+    transform = get_default_transform()
+    dataset = ObjectFolder2Dataset(
+        root_dir=args.data_path,
+        transform=transform,
+        return_label=True
+    )
+    dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=4)
 
-    #4. Linear Evaluation
-    train_size = int(0.8 * len(features))
-    knn = KNeighborsClassifier(n_neighbors=5)
-    knn.fit(features[:train_size], labels[:train_size])
-    preds = knn.predict(features[train_size:])
-    acc = accuracy_score(labels[train_size:], preds)
-    print(f"KNN Accuracy: {acc:.4f}")
+    # Models
+    from torchvision.models import resnet18
+    point_model = DGCNN(args).to(device)
+    image_model = ResNet(resnet18(pretrained=True), feat_dim=256).to(device)
 
-    #5. t-SNE visualization
-    tsne = TSNE(n_components=2, random_state=42)
-    embeddings_2d = tsne.fit_transform(features[:500]) #Subsample for speed
+    point_model.load_state_dict(torch.load(args.point_model_path))
+    image_model.load_state_dict(torch.load(args.image_model_path))
 
-    plt.figure(figsize=(10, 8))
-    scatter = plt.scatter(embeddings_2d[:, 0], embeddings_2d[:, 1], 
-                         c=labels[:500], cmap='tab20', alpha=0.6)
-    plt.colorbar(scatter)
-    plt.title("t-SNE of Point Cloud Embeddings")
-    plt.savefig(f"checkpoints/{args.exp_name}/tsne.png")
-    plt.close()
+    # Feature extraction
+    print("Extracting features...")
+    pc_feats, img_feats, labels = extract_features(dataloader, point_model, image_model, device)
 
-    #6. Cross-modal Retrieval (if we have paired data)
-    if hasattr(args, 'cross_modal'):
-		evaluate_cross_modal(model, val_loader, device)
+    # Classification
+    print("Training SVM on point cloud embeddings...")
+    clf_pc = SVC(kernel='linear', C=1.0)
+    clf_pc.fit(pc_feats, labels)
+    acc_pc = clf_pc.score(pc_feats, labels)
+    print(f"Accuracy (SVM on point cloud features): {acc_pc:.4f}")
 
-def evaluate_cross_modal(model, dataloader, device):
-	"""Evaluate point cloud -> image retrieval"""
-	pc_features, img_features = [], []
+    print("Training SVM on image embeddings...")
+    clf_img = SVC(kernel='linear', C=1.0)
+    clf_img.fit(img_feats, labels)
+    acc_img = clf_img.score(img_feats, labels)
+    print(f"Accuracy (SVM on image features): {acc_img:.4f}")
 
-    #Load the image model (ResNet)
-    img_model = ResNet(resnet50(), feat_dim=2048).to(device)
-    img_model.load_state_dict(torch.load(f"checkpoints/{args.exp_name}/models/img_model_best.pth"))
-    img_model.eval()
-    
-    with torch.no_grad():
-		for point_cloud, img, _ in dataloader:
-            #
-			point_cloud = point_cloud.to(device).transpose(2, 1)
-			_, _, pc_feat = model(point_cloud)
-			pc_features.append(pc_feat.cpu())
+    # t-SNE visualization
+    if args.tsne_plot:
+        print("Generating t-SNE plot...")
+        tsne = TSNE(n_components=2, perplexity=30, random_state=42)
+        reduced = tsne.fit_transform(pc_feats)
 
-			#
-            img_feat = img_model(img.to(device))
-    		img_features.append(img_feat.cpu())
-
-    #Convert to tensors
-    pc_features = torch.cat(pc_features)
-    img_features = torch.cat(img_features)
-
-    #Calculate recovery metrics
-    def calculate_metrics(query_feats, target_feats, top_k=(1, 5, 10)):
-        """Calculate Recall@k y Median Rank"""
-        sim_matrix = torch.mm(query_feats, target_feats.t()) #Similarity matrix
-
-        results = {}
-        for k in top_k:
-            -, indices = sim_matrix.topk(k, dim=1)
-            correct = torch.zeros(len(query_feats))
-            for i in range(len(query_feats)):
-                correct[i] = i in indices[i]
-            results[f"Recall@{k}"] = correct.mean().item()
-
-        #Calculate Median Rank
-        -, indices = sim_matrix.sort(descending=True)
-        ranks = torch.where(indices == torch.arange(len(query_feats)).unsqueeze(1))[1]
-        results["MedianRank"] = torch.median(ranks.float()).item()
-
-        return results
-
-    #Evaluate both directions (PC→Img and Img→PC)
-    print("\nCross Recovery Metrics:")
-
-    #PC → Image
-    metrics = calculate_metrics(pc_features, img_features)
-    print("Point Cloud → Image:")
-    for k, v in metrics.item():
-        print(f"{k}: {v:.4f}")
-
-    #Image → PC
-    metrics = calculate_metrics(img_features, pc_features)
-    print("\nImage → Point Cloud:")
-    for k, v in metrics.items():
-        print(f"{k}: {v:.4f}")
+        plt.figure(figsize=(10, 8))
+        scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab20', s=10)
+        plt.legend(*scatter.legend_elements(), title="Classes", loc="best", fontsize=6)
+        plt.title("t-SNE of Point Cloud Embeddings")
+        plt.savefig(os.path.join(args.output_dir, "tsne_pointclouds.png"))
+        plt.close()
 
 if __name__ == "__main__":
-	import argparse
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--exp_name', type=str, required=True)
-	parser.add_argument('--data_path', type=str, required=True)
-	parser.add_argument('--batch_size', type=int, default=32)
-	parser.add_argument('--k', type=int, default=20)
-	parser.add_argument('--emb_dims', type=int, default=1024)
-	args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_path', type=str, required=True)
+    parser.add_argument('--point_model_path', type=str, required=True)
+    parser.add_argument('--image_model_path', type=str, required=True)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--cuda', action='store_true')
+    parser.add_argument('--output_dir', type=str, default='results')
+    parser.add_argument('--emb_dims', type=int, default=1024)
+    parser.add_argument('--dropout', type=float, default=0.5)
+    parser.add_argument('--k', type=int, default=20)
+    parser.add_argument('--tsne_plot', action='store_true')
+    args = parser.parse_args()
 
-	evaluate(args)
+    os.makedirs(args.output_dir, exist_ok=True)
+    main(args)

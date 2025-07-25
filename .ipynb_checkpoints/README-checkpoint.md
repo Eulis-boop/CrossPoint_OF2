@@ -74,11 +74,8 @@ python evaluate.py \
 - Linear classifier accuracy (on ObjectFolder2)
 - t-SNE visualizations (colored by object class)
 
-```Linear classifier accuracy (SVM): %```
-
 <p align="center">
     <em>(Pending...)</em>
-    <img src="docs/tsne_example.png" alt="t-SNE visualization of embeddings" width="500"/>
 </p>
 
 ---
