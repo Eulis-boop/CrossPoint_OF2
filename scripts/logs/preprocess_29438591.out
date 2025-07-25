@@ -1,0 +1,8 @@
+Preprocessing ObjectFolder 2.0 dataset...
+
+Starting preprocessing from: /scratch/sarai/ObjectFolder_data
+
+
+ Preprocessing complete.
+ Successfully processed objects: 998
+ Skipped objects (missing files or errors): 2
