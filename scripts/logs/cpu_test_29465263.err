@@ -1,0 +1,39 @@
+/home/sarai/jupyter1/lib/python3.10/site-packages/torch/utils/_pytree.py:185: FutureWarning: optree is installed but the version is too old to support PyTorch Dynamo in C++ pytree. C++ pytree support is disabled. Please consider upgrading optree using `python3 -m pip install --upgrade 'optree>=0.13.0'`.
+  warnings.warn(
+wandb: ERROR api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+Traceback (most recent call last):
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 122, in <module>
+    main()
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 119, in main
+    train(args, io)
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 24, in train
+    wandb.init(project="CrossPoint-OF2", name=args.exp_name)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1183, in init
+    raise e
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1160, in init
+    wi.setup(kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 306, in setup
+    wandb_login._login(
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_login.py", line 298, in _login
+    wlogin.prompt_api_key()
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_login.py", line 228, in prompt_api_key
+    raise UsageError("api_key not configured (no-tty). call " + directive)
+wandb.errors.UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+Traceback (most recent call last):
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 122, in <module>
+    main()
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 119, in main
+    train(args, io)
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 24, in train
+    wandb.init(project="CrossPoint-OF2", name=args.exp_name)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1183, in init
+    raise e
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1160, in init
+    wi.setup(kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 306, in setup
+    wandb_login._login(
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_login.py", line 298, in _login
+    wlogin.prompt_api_key()
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/wandb/sdk/wandb_login.py", line 228, in prompt_api_key
+    raise UsageError("api_key not configured (no-tty). call " + directive)
+wandb.errors.UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key])

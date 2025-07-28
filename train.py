@@ -112,6 +112,7 @@ def main():
     if args.cuda:
         torch.cuda.manual_seed_all(42)
 
+    setup_directories(args.exp_name)
     io = IOStream(f'checkpoints/{args.exp_name}/log.txt')
     io.cprint(str(args))
 

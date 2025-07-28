@@ -1,6 +1,2 @@
 /home/sarai/jupyter1/lib/python3.10/site-packages/torch/utils/_pytree.py:185: FutureWarning: optree is installed but the version is too old to support PyTorch Dynamo in C++ pytree. C++ pytree support is disabled. Please consider upgrading optree using `python3 -m pip install --upgrade 'optree>=0.13.0'`.
   warnings.warn(
-Traceback (most recent call last):
-  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 6, in <module>
-    import wandb
-ModuleNotFoundError: No module named 'wandb'

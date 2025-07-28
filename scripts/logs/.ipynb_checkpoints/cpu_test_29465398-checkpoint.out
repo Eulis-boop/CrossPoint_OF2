@@ -1,0 +1,1 @@
+Namespace(exp_name='cpu_test_run', data_path='/scratch/sarai/ObjectFolder_data/processed', batch_size=4, epochs=2, start_epoch=0, lr=0.001, dropout=0.5, emb_dims=1024, k=20, resume=False, model_path='', cuda=False, print_freq=1)
