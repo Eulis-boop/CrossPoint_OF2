@@ -16,10 +16,12 @@ from datasets.ObjectFolder2 import ObjectFolder2Dataset, get_default_transform
 from models.dgcnn import DGCNN, ResNet
 from util import IOStream, AverageMeter
 
+
 if "SLURM_STEP_GPUS" in os.environ:
     del os.environ["SLURM_STEP_GPUS"]
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 
 def setup_directories(exp_name):
     os.makedirs(f'checkpoints/{exp_name}/models', exist_ok=True)

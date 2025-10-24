@@ -10,6 +10,7 @@
 
 module load python/3.10
 module load cuda/12.2
+
 source ~/jupyter1/bin/activate
 
 cd /project/def-galray/sarai/CrossPoint_OF2

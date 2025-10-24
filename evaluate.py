@@ -114,7 +114,7 @@ def main(args):
     if args.tsne_plot:
         print("Generating t-SNE plot...")
 
-        # Subsampling for speed (recommended if dataset is large)
+        # Subsampling for speed
         if len(pc_feats) > 5000:
             idx = np.random.choice(len(pc_feats), 5000, replace=False)
             pc_feats = pc_feats[idx]
