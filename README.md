@@ -106,4 +106,4 @@ python evaluate.py \
   Université de Moncton – Mitacs Globalink Research Internship 2025
 - **Ghazal Rouhafzay, Ph.D.**
   
-  Université de Moncton – Mitacs Globalink Research Internship 2025
+  Université de Moncton
