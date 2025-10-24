@@ -113,6 +113,13 @@ def main(args):
     # t-SNE visualization (point clouds)
     if args.tsne_plot:
         print("Generating t-SNE plot...")
+
+        # Subsampling for speed (recommended if dataset is large)
+        if len(pc_feats) > 5000:
+            idx = np.random.choice(len(pc_feats), 5000, replace=False)
+            pc_feats = pc_feats[idx]
+            labels = labels[idx]
+        
         tsne = TSNE(n_components=2, perplexity=30, random_state=42)
         reduced = tsne.fit_transform(pc_feats)
         plt.figure(figsize=(10, 8))

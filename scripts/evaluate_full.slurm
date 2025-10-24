@@ -16,8 +16,8 @@ cd /project/def-galray/sarai/CrossPoint_OF2
 python evaluate.py \
   --exp_name of2_full_run \
   --data_path /scratch/sarai/ObjectFolder_data/processed \
-  --point_model_path best_point_model.pth \
-  --image_model_path best_img_model.pth \
+  --point_model_path point_model_epoch99.pth \
+  --image_model_path img_model_epoch99.pth \
   --batch_size 64 \
   --cuda \
   --output_dir results/of2_full_run \
