@@ -75,6 +75,7 @@ python evaluate.py \
 - t-SNE visualizations (colored by object class)
 
 ```Linear classifier accuracy (SVM) in Point Clouds: 27.00%```
+
 ```Linear classifier accuracy (SVM) in Images: 28.50%```
 
 <p align="center">
@@ -100,7 +101,9 @@ python evaluate.py \
 ---
 
 ## Authors
-- Eunice Saraí Castillo Turrubiartes
+- **Eunice Saraí Castillo Turrubiartes**
+  
   Université de Moncton – Mitacs Globalink Research Internship 2025
-- Ghazal Rouhafzay, Ph.D.
+- **Ghazal Rouhafzay, Ph.D.**
+  
   Université de Moncton – Mitacs Globalink Research Internship 2025
