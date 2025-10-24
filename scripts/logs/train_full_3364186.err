@@ -1,0 +1,73 @@
+wandb: Currently logged in as: esarai (esarai-universit-de-moncton). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.22.2 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.15.9
+wandb: Run data is saved locally in /project/6088306/sarai/CrossPoint_OF2/wandb/run-20251024_100329-pknjq2cx
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run of2_full_run
+wandb: ⭐️ View project at https://wandb.ai/esarai-universit-de-moncton/CrossPoint-OF2
+wandb: 🚀 View run at https://wandb.ai/esarai-universit-de-moncton/CrossPoint-OF2/runs/pknjq2cx
+Using cache found in /home/sarai/.cache/torch/hub/pytorch_vision_v0.10.0
+/home/sarai/jupyter1/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/sarai/jupyter1/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet18_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet18_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+/home/sarai/jupyter1/lib/python3.10/site-packages/torch/optim/lr_scheduler.py:227: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+Traceback (most recent call last):
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 127, in <module>
+    main()
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 124, in main
+    train(args, io)
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 65, in train
+    img_feat = img_model(img)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/6088306/sarai/CrossPoint_OF2/models/dgcnn.py", line 151, in forward
+    x = self.inv_head(x)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x512 and 256x512)
+Traceback (most recent call last):
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 127, in <module>
+    main()
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 124, in main
+    train(args, io)
+  File "/project/6088306/sarai/CrossPoint_OF2/train.py", line 65, in train
+    img_feat = img_model(img)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/project/6088306/sarai/CrossPoint_OF2/models/dgcnn.py", line 151, in forward
+    x = self.inv_head(x)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/sarai/jupyter1/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x512 and 256x512)
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: 🚀 View run of2_full_run at: https://wandb.ai/esarai-universit-de-moncton/CrossPoint-OF2/runs/pknjq2cx
+wandb: ️⚡ View job at https://wandb.ai/esarai-universit-de-moncton/CrossPoint-OF2/jobs/QXJ0aWZhY3RDb2xsZWN0aW9uOjcwMDIwNjU0NA==/version_details/v3
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20251024_100329-pknjq2cx/logs

@@ -16,6 +16,11 @@ from datasets.ObjectFolder2 import ObjectFolder2Dataset, get_default_transform
 from models.dgcnn import DGCNN, ResNet
 from util import IOStream, AverageMeter
 
+if "SLURM_STEP_GPUS" in os.environ:
+    del os.environ["SLURM_STEP_GPUS"]
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 def setup_directories(exp_name):
     os.makedirs(f'checkpoints/{exp_name}/models', exist_ok=True)
     os.makedirs(f'checkpoints/{exp_name}/features', exist_ok=True)
@@ -23,8 +28,8 @@ def setup_directories(exp_name):
 def train(args, io):
     wandb.init(project="CrossPoint-OF2", name=args.exp_name)
     setup_directories(args.exp_name)
-
-    device = torch.device("cuda" if args.cuda else "cpu")
+    
+    device = torch.device("cuda:0" if args.cuda and torch.cuda.is_available() else "cpu")
 
     transform = get_default_transform()
     dataset = ObjectFolder2Dataset(root_dir=args.data_path, transform=transform)
@@ -32,7 +37,7 @@ def train(args, io):
 
     # Model setup
     point_model = DGCNN(args).to(device)
-    img_model = ResNet(torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True), feat_dim=256).to(device)
+    img_model = ResNet(torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True), feat_dim=512).to(device)
 
     if args.resume:
         point_model.load_state_dict(torch.load(args.model_path))

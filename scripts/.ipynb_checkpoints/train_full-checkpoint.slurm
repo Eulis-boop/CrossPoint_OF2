@@ -9,9 +9,16 @@
 #SBATCH --error=logs/train_full_%j.err
 
 module load python/3.10
+module load cuda/12.2
 source ~/jupyter1/bin/activate
 
 cd /project/def-galray/sarai/CrossPoint_OF2
+
+nvidia-smi
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.device_count(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'No GPU')"
+
+unset SLURM_STEP_GPUS
+export CUDA_VISIBLE_DEVICES=0
 
 python train.py \
   --data_path /scratch/sarai/ObjectFolder_data/processed \

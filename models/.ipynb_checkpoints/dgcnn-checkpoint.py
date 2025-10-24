@@ -1,3 +1,8 @@
+# Adapted from the official CrossPoint repository:
+# https://github.com/yongqinwang/CrossPoint
+# Original DGCNN implementation: Wang et al., "Dynamic Graph CNN for Learning on Point Clouds" (2019)
+# Paper: https://arxiv.org/abs/1801.07829
+
 import os
 import sys
 import copy
@@ -24,7 +29,7 @@ def get_graph_feature(x, k=20, idx=None):
     x = x.view(batch_size, -1, num_points)
     if idx is None:
         idx = knn(x, k=k)   # (batch_size, num_points, k)
-    device = torch.device('cuda:1')
+    device = x.device
 
     idx_base = torch.arange(0, batch_size, device=device).view(-1, 1, 1)*num_points
 
@@ -129,7 +134,7 @@ class DGCNN(nn.Module):
     
 
 class ResNet(nn.Module):
-    def __init__(self, model, feat_dim = 2048):
+    def __init__(self, model, feat_dim = 512):
         super(ResNet, self).__init__()
         self.resnet = model
         self.resnet.fc = nn.Identity()
