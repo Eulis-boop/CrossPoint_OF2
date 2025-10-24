@@ -19,16 +19,43 @@ def extract_features(dataloader, point_model, image_model, device):
 
     pc_feats_list, img_feats_list, labels_list = [], [], []
 
-    for pc, img, label in dataloader:
+    for batch in dataloader:
+        pc, img, label = batch
+    
+        if isinstance(label, (tuple, list)):
+            label = label[0]
+    
+        if isinstance(label, list) and isinstance(label[0], str):
+            if 'label_to_idx' not in locals():
+                label_to_idx = {}
+            numeric_labels = []
+            for l in label:
+                if l not in label_to_idx:
+                    label_to_idx[l] = len(label_to_idx)
+                numeric_labels.append(label_to_idx[l])
+            label = torch.tensor(numeric_labels)
+        elif isinstance(label, str):
+            if 'label_to_idx' not in locals():
+                label_to_idx = {}
+            if label not in label_to_idx:
+                label_to_idx[label] = len(label_to_idx)
+            label = torch.tensor([label_to_idx[label]])
+    
+        if label.ndim == 0:
+            label = label.unsqueeze(0)
+        if label.shape[0] != pc.shape[0]:
+            label = label.repeat(pc.shape[0])
+    
         pc = pc.to(device).transpose(2, 1)
         img = img.to(device)
-
+    
+        # Forward
         _, pc_emb, _ = point_model(pc)
         img_emb = image_model(img)
-
+    
         pc_feats_list.append(pc_emb.cpu().numpy())
         img_feats_list.append(img_emb.cpu().numpy())
-        labels_list.extend(label.numpy())
+        labels_list.extend(label.cpu().numpy().tolist())
 
     pc_feats  = np.vstack(pc_feats_list)
     img_feats = np.vstack(img_feats_list)
@@ -56,7 +83,7 @@ def main(args):
     # Model instantiation
     point_model = DGCNN(args).to(device)
     from torchvision.models import resnet18
-    image_model = ResNet(resnet18(pretrained=True), feat_dim=256).to(device)
+    image_model = ResNet(resnet18(pretrained=True), feat_dim=512).to(device)
 
     # Load checkpoints
     ckpt_dir = os.path.join("checkpoints", args.exp_name, "models")

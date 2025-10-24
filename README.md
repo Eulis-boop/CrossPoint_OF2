@@ -74,11 +74,11 @@ python evaluate.py \
 - Linear classifier accuracy (on ObjectFolder2)
 - t-SNE visualizations (colored by object class)
 
-```Linear classifier accuracy (SVM): %```
+```Linear classifier accuracy (SVM) in Point Clouds: 27.00%```
+```Linear classifier accuracy (SVM) in Images: 28.50%```
 
 <p align="center">
-    <em>(Pending...)</em>
-    <img src="docs/tsne_example.png" alt="t-SNE visualization of embeddings" width="500"/>
+    <img src="results/of2_full_run/tsne_pointclouds.png" alt="t-SNE visualization of embeddings" width="500"/>
 </p>
 
 ---
@@ -101,4 +101,6 @@ python evaluate.py \
 
 ## Authors
 - Eunice Saraí Castillo Turrubiartes
-- Ghazal Rouhafzay
+  Université de Moncton – Mitacs Globalink Research Internship 2025
+- Ghazal Rouhafzay, Ph.D.
+  Université de Moncton – Mitacs Globalink Research Internship 2025
