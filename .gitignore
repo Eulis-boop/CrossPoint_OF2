@@ -1,0 +1,14 @@
+# Ignore checkpoints and heavy results
+checkpoints/
+results/
+wandb/
+*.pt
+*.pth
+*.npy
+*.npz
+*.log
+
+# Ignore temporal files
+__pycache__/
+*.pyc
+.DS_Store
